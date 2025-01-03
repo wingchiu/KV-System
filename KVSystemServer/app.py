@@ -8,7 +8,7 @@ from datetime import datetime
 app = Quart(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
-# Configure logging
+# Configure logging to suppress noisy modules
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("httpcore").setLevel(logging.WARNING)
 logging.getLogger("websockets").setLevel(logging.WARNING)
