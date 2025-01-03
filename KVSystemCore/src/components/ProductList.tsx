@@ -29,7 +29,7 @@ export default function ProductList({ products, onDelete, onUpdate }: ProductLis
   }
 
   return (
-    <div className="grid gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {products.map((product) => (
         <Card key={product.id} className="p-4">
           <div className="flex items-start gap-4">
@@ -69,6 +69,7 @@ export default function ProductList({ products, onDelete, onUpdate }: ProductLis
               <h3 className="text-lg font-semibold">{product.name}</h3>
               <p className="text-sm text-gray-600 mt-1">{product.description}</p>
               <p className="text-sm text-gray-500 mt-1">Category: {product.category}</p>
+              <p className="text-sm text-gray-500 mt-1">Product Type: {product.product_type}</p>
               <p className="text-sm text-gray-500 mt-1">Lora Filename: {product.lora_path}</p>
               <div className="flex gap-2 mt-4">
                 <Button 

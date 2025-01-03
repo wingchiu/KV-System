@@ -19,6 +19,7 @@ interface FormData {
   name: string
   description: string
   category: 'coffee' | 'snacks' | 'beverages'
+  product_type: string
   lora_path: string
   image: File | null
   imagePreview: string | null
@@ -29,6 +30,7 @@ export default function ProductForm({ initialData, onSubmit, loading }: ProductF
     name: initialData?.name || '',
     description: initialData?.description || '',
     category: initialData?.category || 'coffee',
+    product_type: initialData?.product_type || '',
     lora_path: initialData?.lora_path || '',
     image: null,
     imagePreview: initialData?.image_url || null
@@ -59,7 +61,7 @@ export default function ProductForm({ initialData, onSubmit, loading }: ProductF
   }
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.description || !formData.lora_path) {
+    if (!formData.name || !formData.description || !formData.product_type || !formData.lora_path) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields",
@@ -91,6 +93,11 @@ export default function ProductForm({ initialData, onSubmit, loading }: ProductF
         placeholder="Product Description"
         value={formData.description}
         onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+      />
+      <Input
+        placeholder="Product Type"
+        value={formData.product_type}
+        onChange={(e) => setFormData(prev => ({ ...prev, product_type: e.target.value }))}
       />
       <Input
         placeholder="Lora Filename"

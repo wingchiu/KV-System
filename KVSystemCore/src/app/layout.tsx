@@ -8,8 +8,22 @@ import { SupabaseProvider } from '@/components/SupabaseProvider'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Publicis KV System',
-  description: 'AI-powered Key Visual Generation System',
+  title: 'KV Generation System',
+  description: 'Image generation system for KV',
+  icons: {
+    icon: [
+      {
+        url: '/favicon.ico',
+        sizes: 'any',
+      },
+    ],
+    apple: [
+      {
+        url: '/apple-touch-icon.png',
+        sizes: '180x180',
+      },
+    ],
+  },
 }
 
 export default function RootLayout({
@@ -18,7 +32,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      </head>
       <body className={inter.className}>
         <SupabaseProvider>
           <Navbar />

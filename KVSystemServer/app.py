@@ -1,10 +1,28 @@
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 from async_image_processor import AsyncImageProcessor
+from async_llm_processor import AsyncLLMProcessor
 import os
 import asyncio
+import logging
+from datetime import datetime
 
 app = Flask(__name__)
+# Enable CORS for all routes and origins
+CORS(app, resources={
+    r"/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+
+# Configure logging
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("websockets").setLevel(logging.WARNING)
+logging.getLogger("hpack").setLevel(logging.WARNING)
 
 # Configure the output directory path
 COMFYUI_OUTPUT_DIR = os.path.join("D:", "ComfyUI", "ComfyUI", "output")  # Adjust this path to match your ComfyUI installation
@@ -45,7 +63,7 @@ def generate_prompt():
 
         async def process():
             async with AsyncImageProcessor(output_dir=COMFYUI_OUTPUT_DIR) as processor:
-                return await processor.process_image(image_file.stream)
+                return await processor.process_image_prompt(image_file.stream)
 
         result = run_async(process())
             
@@ -74,7 +92,7 @@ def generate_flux_lora():
         data = request.get_json()
         print(f"Request data: {data}")
         
-        required_fields = ['width', 'height', 'lora_name', 'model_name', 'positive_prompt', 'negative_prompt', 'batch_size']
+        required_fields = ['width', 'height', 'lora_name', 'positive_prompt', 'negative_prompt', 'batch_size']
         
         # Validate required fields
         for field in required_fields:
@@ -90,11 +108,10 @@ def generate_flux_lora():
         print("All required fields present, processing request...")
         async def process():
             async with AsyncImageProcessor(output_dir=COMFYUI_OUTPUT_DIR) as processor:
-                return await processor.process_flux_lora(
+                return await processor.process_flux_gguf_lora_basic(
                     width=data['width'],
                     height=data['height'],
                     lora_name=data['lora_name'],
-                    model_name=data['model_name'],
                     positive_prompt=data['positive_prompt'],
                     negative_prompt=data['negative_prompt'],
                     batch_size=data['batch_size']
@@ -102,21 +119,14 @@ def generate_flux_lora():
 
         print("Running async process...")
         result = run_async(process())
-        #print(f"Process result: {result}")
-            
-        if result['success']:
-            print(f"Success! Generated {len(result['images'])} images")
-            return jsonify({
-                'success': True,
-                'images': result['images']
-            }), 200
+        
+        if result is not None:
+            return jsonify(result), 200
         else:
-            error_msg = result.get('error', 'Unknown error occurred')
-            print(f"Error: {error_msg}")
             return jsonify({
                 'success': False,
-                'error': error_msg,
-                'steps': result.get('steps', [])
+                'error': 'Failed to generate images',
+                'steps': []
             }), 500
         
     except Exception as e:
@@ -126,6 +136,35 @@ def generate_flux_lora():
             'success': False,
             'error': error_msg,
             'steps': []
+        }), 500
+
+@app.route('/run_llm', methods=['POST'])
+def run_llm():
+    try:
+        data = request.get_json()
+        if not data or 'prompt' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'No prompt provided'
+            }), 400
+
+        prompt = data['prompt']
+
+        async def process():
+            processor = AsyncLLMProcessor()
+            return await processor.process(prompt)
+
+        response = run_async(process())
+        
+        return jsonify({
+            'success': True,
+            'response': response
+        })
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
         }), 500
 
 if __name__ == '__main__':

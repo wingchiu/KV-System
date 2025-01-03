@@ -127,6 +127,7 @@
             
             // Clear previous output
             status.textContent = 'Generating images...';
+            status.className = 'processing';
             output.innerHTML = '';
             generateBtn.disabled = true;
             
@@ -137,8 +138,8 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        width: 1024,
-                        height: 768,
+                        width: parseInt(document.getElementById('width').value),
+                        height: parseInt(document.getElementById('height').value),
                         lora_name: document.getElementById('lora').value,
                         model_name: document.getElementById('model').value,
                         positive_prompt: document.getElementById('positive').value,
@@ -151,84 +152,51 @@
                 const result = await response.json();
                 console.log('Response data:', result);
                 
-                if (result.success) {
+                if (result) {
                     status.className = 'success';
                     status.textContent = 'Images generated successfully!';
                     
-                    if (!result.images || result.images.length === 0) {
-                        throw new Error('No images received from server');
-                    }
-                    
-                    console.log(`Received ${result.images.length} images`);
-                    
-                    // Display the generated images
-                    result.images.forEach((imageData, index) => {
-                        console.log(`Processing image ${index + 1}`);
-                        const img = document.createElement('img');
-                        img.style.maxWidth = '100%';
-                        img.style.height = 'auto';
-                        img.style.marginBottom = '10px';
-                        
-                        try {
-                            if (!imageData) {
-                                throw new Error('Image data is empty');
-                            }
-                            
-                            // Create a container for each image
+                    // Handle the returned image data
+                    for (const nodeId in result) {
+                        const images = result[nodeId];
+                        images.forEach((imageData, index) => {
+                            // Create a container for the image and metadata
                             const container = document.createElement('div');
-                            container.style.marginBottom = '20px';
+                            container.style.border = '1px solid #ddd';
+                            container.style.padding = '10px';
+                            container.style.borderRadius = '4px';
                             
-                            // Create a loading message
-                            const loadingMsg = document.createElement('div');
-                            loadingMsg.textContent = `Loading image ${index + 1}...`;
-                            container.appendChild(loadingMsg);
+                            // Create and set up the image element
+                            const img = document.createElement('img');
+                            img.style.width = '100%';
+                            img.style.height = 'auto';
+                            img.style.marginBottom = '10px';
                             
-                            // Set up image loading handlers
-                            img.onerror = () => {
-                                console.error(`Failed to load image ${index + 1}`);
-                                loadingMsg.textContent = `Failed to load image ${index + 1}`;
-                                loadingMsg.style.color = 'red';
-                                
-                                // Log image data info for debugging
-                                console.log(`Image ${index + 1} data type:`, typeof imageData);
-                                console.log(`Image ${index + 1} data length:`, imageData.length);
-                                if (typeof imageData === 'string') {
-                                    console.log(`Image ${index + 1} data preview:`, imageData.substring(0, 100));
-                                }
-                            };
-                            
-                            img.onload = () => {
-                                console.log(`Successfully loaded image ${index + 1}`);
-                                container.removeChild(loadingMsg);
-                                status.textContent = 'Images generated and loaded successfully!';
-                            };
-                            
-                            // Set the image source
-                            if (imageData.startsWith('data:image')) {
-                                img.src = imageData;
+                            // Set the image source to the URL from Supabase
+                            if (imageData.image_url) {
+                                img.src = imageData.image_url;
                             } else {
-                                img.src = `data:image/png;base64,${imageData}`;
+                                console.error('No image URL provided');
+                                container.innerHTML = '<p class="error">Error: No image URL available</p>';
+                                return;
                             }
+                            
+                            // Add metadata display
+                            const metadata = document.createElement('div');
+                            metadata.className = 'metadata';
+                            metadata.innerHTML = `
+                                <p><strong>Generated:</strong> ${new Date(imageData.generated_at).toLocaleString()}</p>
+                                <p><strong>Resolution:</strong> ${imageData.resolution}</p>
+                                <p><strong>Seed:</strong> ${imageData.seed}</p>
+                            `;
                             
                             container.appendChild(img);
+                            container.appendChild(metadata);
                             output.appendChild(container);
-                        } catch (error) {
-                            console.error(`Error processing image ${index + 1}:`, error);
-                            status.textContent += `\nError processing image ${index + 1}: ${error.message}`;
-                        }
-                    });
-                } else {
-                    status.className = 'error';
-                    status.textContent = `Error: ${result.error || 'Unknown error occurred'}`;
-                    if (result.steps) {
-                        status.textContent += '\n\nDebug information:';
-                        result.steps.forEach(step => {
-                            status.textContent += `\n- ${step.name}: ${step.success ? 'Success' : 'Failed'}`;
-                            if (step.error) {
-                                status.textContent += ` (${step.error})`;
-                            }
                         });
                     }
+                } else {
+                    throw new Error('No result received from server');
                 }
             } catch (error) {
                 console.error('Error:', error);

@@ -10,14 +10,19 @@ export default function Navbar() {
     <nav className="border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Image 
-            src="/logo.svg" 
-            alt="Publicis KV" 
-            width={32} 
-            height={32}
-            priority
-          />
-          <span className="font-semibold text-xl">Publicis KV</span>
+          <Link href="/" className="flex items-center gap-2">
+            <Image 
+              src="/logo.svg" 
+              alt="Publicis RoarFX" 
+              width={32} 
+              height={32}
+              priority
+            />
+            <div className="flex items-center">
+              <span className="font-semibold text-xl">Publicis </span>
+              <span className="font-semibold text-xl bg-amber-600 text-white px-2 rounded ml-1">RoarFX</span>
+            </div>
+          </Link>
         </div>
         
         <div className="flex-1 max-w-xl mx-8">

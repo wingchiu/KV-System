@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react'
 import { Product } from '@/lib/types'
 import { useToast } from './ui/use-toast'
 import { supabase } from '@/lib/supabase'
+import { useProduct } from '@/lib/contexts/ProductContext'
 
 export default function ProductSelector() {
   const [products, setProducts] = useState<Record<string, Product[]>>({
@@ -14,7 +15,7 @@ export default function ProductSelector() {
     snacks: [],
     beverages: []
   })
-  const [selectedProduct, setSelectedProduct] = useState<number | null>(null)
+  const { selectedProduct, setSelectedProduct } = useProduct()
   const { toast } = useToast()
 
   useEffect(() => {
@@ -27,25 +28,34 @@ export default function ProductSelector() {
         
         if (error) throw error
 
-        const categorized = (data || []).reduce((acc, product) => {
+        const categorized = (data || []).reduce((acc: Record<string, Product[]>, product) => {
           if (!acc[product.category]) {
             acc[product.category] = []
           }
           acc[product.category].push(product)
           return acc
-        }, {} as Record<string, Product[]>)
-        
+        }, {
+          coffee: [],
+          snacks: [],
+          beverages: []
+        })
+
         setProducts(categorized)
       } catch (error) {
         toast({
           title: "Error",
-          description: "Failed to load products",
+          description: "Failed to fetch products",
           variant: "destructive",
         })
       }
     }
+
     fetchProducts()
   }, [toast])
+
+  const handleProductSelect = (product: Product) => {
+    setSelectedProduct(product)
+  }
 
   return (
     <Tabs defaultValue="coffee">
@@ -55,25 +65,25 @@ export default function ProductSelector() {
         <TabsTrigger value="beverages">Beverages</TabsTrigger>
       </TabsList>
 
-      {Object.entries(products).map(([category, items]) => (
-        <TabsContent key={category} value={category}>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {items.map((product) => (
+      {Object.entries(products).map(([category, categoryProducts]) => (
+        <TabsContent key={category} value={category} className="mt-0">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {categoryProducts.map((product) => (
               <Card
                 key={product.id}
                 className={`p-2 cursor-pointer transition-all hover:ring-2 hover:ring-yellow-500
-                  ${selectedProduct === product.id ? 'ring-2 ring-yellow-500' : ''}`}
-                onClick={() => setSelectedProduct(product.id)}
+                  ${selectedProduct?.id === product.id ? 'ring-2 ring-yellow-500' : ''}`}
+                onClick={() => handleProductSelect(product)}
               >
                 <div className="aspect-square relative mb-2 rounded-lg overflow-hidden">
                   <Image
                     src={product.image_url}
                     alt={product.name}
                     fill
-                    className="object-contain p-2"
+                    className="object-cover"
                   />
                 </div>
-                <p className="text-center font-medium">{product.name}</p>
+                <p className="text-sm font-medium text-center">{product.name}</p>
               </Card>
             ))}
           </div>

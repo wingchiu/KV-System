@@ -126,6 +126,7 @@ export default function SetupPage() {
           name: formData.name,
           description: formData.description,
           category: formData.category,
+          product_type: formData.product_type,
           lora_path: formData.lora_path,
           image_url: publicUrl
         }])
@@ -154,6 +155,7 @@ export default function SetupPage() {
         name: formData.name,
         description: formData.description,
         category: formData.category,
+        product_type: formData.product_type,
         lora_path: formData.lora_path,
       }
 
