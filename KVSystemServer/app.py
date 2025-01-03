@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, jsonify
-from flask_cors import CORS
 from async_image_processor import AsyncImageProcessor
 from async_llm_processor import AsyncLLMProcessor
 import os
@@ -8,14 +7,6 @@ import logging
 from datetime import datetime
 
 app = Flask(__name__)
-# Enable CORS for all routes and origins
-CORS(app, resources={
-    r"/*": {
-        "origins": "*",
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
-    }
-})
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # Configure logging
@@ -168,4 +159,6 @@ def run_llm():
         }), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))  # Use Railway's PORT environment variable  
+    app.run(host='0.0.0.0', port=port)  
+    #app.run(debug=True)
