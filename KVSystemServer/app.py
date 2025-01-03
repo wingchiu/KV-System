@@ -1,12 +1,11 @@
-from flask import Flask, render_template, request, jsonify
+from quart import Quart, render_template, request, jsonify
 from async_image_processor import AsyncImageProcessor
 from async_llm_processor import AsyncLLMProcessor
 import os
-import asyncio
 import logging
 from datetime import datetime
 
-app = Flask(__name__)
+app = Quart(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # Configure logging
@@ -18,24 +17,16 @@ logging.getLogger("hpack").setLevel(logging.WARNING)
 # Configure the output directory path
 COMFYUI_OUTPUT_DIR = os.path.join("D:", "ComfyUI", "ComfyUI", "output")  # Adjust this path to match your ComfyUI installation
 
-def run_async(coro):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        return loop.run_until_complete(coro)
-    finally:
-        loop.close()
-
 @app.route('/')
-def home():
-    return render_template('index.html')
+async def home():
+    return await render_template('index.html')
 
 @app.route('/flux_lora_test')
-def flux_lora_test():
-    return render_template('flux_lora_test.html')
+async def flux_lora_test():
+    return await render_template('flux_lora_test.html')
 
 @app.route('/generate_prompt', methods=['POST'])
-def generate_prompt():
+async def generate_prompt():
     try:
         if 'image' not in request.files:
             return jsonify({
@@ -44,7 +35,7 @@ def generate_prompt():
                 'steps': []
             }), 400
             
-        image_file = request.files['image']
+        image_file = await request.files['image']
         if image_file.filename == '':
             return jsonify({
                 'success': False,
@@ -52,11 +43,8 @@ def generate_prompt():
                 'steps': []
             }), 400
 
-        async def process():
-            async with AsyncImageProcessor(output_dir=COMFYUI_OUTPUT_DIR) as processor:
-                return await processor.process_image_prompt(image_file.stream)
-
-        result = run_async(process())
+        async with AsyncImageProcessor(output_dir=COMFYUI_OUTPUT_DIR) as processor:
+            result = await processor.process_image_prompt(image_file.stream)
             
         response = {
             'success': result['success'],
@@ -77,10 +65,10 @@ def generate_prompt():
         }), 500
 
 @app.route('/generate_flux_lora', methods=['POST'])
-def generate_flux_lora():
+async def generate_flux_lora():
     try:
         print("\nReceived generate_flux_lora request")
-        data = request.get_json()
+        data = await request.get_json()
         print(f"Request data: {data}")
         
         required_fields = ['width', 'height', 'lora_name', 'positive_prompt', 'negative_prompt', 'batch_size']
@@ -97,19 +85,15 @@ def generate_flux_lora():
                 }), 400
 
         print("All required fields present, processing request...")
-        async def process():
-            async with AsyncImageProcessor(output_dir=COMFYUI_OUTPUT_DIR) as processor:
-                return await processor.process_flux_gguf_lora_basic(
-                    width=data['width'],
-                    height=data['height'],
-                    lora_name=data['lora_name'],
-                    positive_prompt=data['positive_prompt'],
-                    negative_prompt=data['negative_prompt'],
-                    batch_size=data['batch_size']
-                )
-
-        print("Running async process...")
-        result = run_async(process())
+        async with AsyncImageProcessor(output_dir=COMFYUI_OUTPUT_DIR) as processor:
+            result = await processor.process_flux_gguf_lora_basic(
+                width=data['width'],
+                height=data['height'],
+                lora_name=data['lora_name'],
+                positive_prompt=data['positive_prompt'],
+                negative_prompt=data['negative_prompt'],
+                batch_size=data['batch_size']
+            )
         
         if result is not None:
             return jsonify(result), 200
@@ -130,9 +114,9 @@ def generate_flux_lora():
         }), 500
 
 @app.route('/run_llm', methods=['POST'])
-def run_llm():
+async def run_llm():
     try:
-        data = request.get_json()
+        data = await request.get_json()
         if not data or 'prompt' not in data:
             return jsonify({
                 'success': False,
@@ -140,12 +124,8 @@ def run_llm():
             }), 400
 
         prompt = data['prompt']
-
-        async def process():
-            processor = AsyncLLMProcessor()
-            return await processor.process(prompt)
-
-        response = run_async(process())
+        processor = AsyncLLMProcessor()
+        response = await processor.process(prompt)
         
         return jsonify({
             'success': True,
@@ -159,6 +139,5 @@ def run_llm():
         }), 500
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # Use Railway's PORT environment variable  
-    app.run(host='0.0.0.0', port=port)  
-    #app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
