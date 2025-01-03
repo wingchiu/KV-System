@@ -3,7 +3,6 @@ const nextConfig = {
   output: 'standalone',
   images: {
     domains: ['localhost', 'xsgames.co'],
-    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -11,7 +10,9 @@ const nextConfig = {
       },
     ],
   },
-  swcMinify: false
+  experimental: {
+    outputFileTracingRoot: undefined,
+  },
 }
 
 module.exports = nextConfig
