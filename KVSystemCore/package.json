@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p $PORT",
     "lint": "next lint"
   },
   "dependencies": {
@@ -23,28 +23,28 @@
     "@supabase/auth-ui-react": "^0.4.6",
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.38.4",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.0.0",
-    "date-fns": "^4.1.0",
-    "lucide-react": "^0.292.0",
-    "next": "13.5.6",
-    "openai": "^4.17.4",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-hook-form": "^7.48.2",
-    "tailwind-merge": "^2.0.0",
-    "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.22.4"
-  },
-  "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "date-fns": "^4.1.0",
     "eslint": "^8",
     "eslint-config-next": "13.5.6",
+    "lucide-react": "^0.292.0",
+    "next": "13.5.6",
+    "openai": "^4.17.4",
     "postcss": "^8",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-hook-form": "^7.48.2",
+    "tailwind-merge": "^2.0.0",
     "tailwindcss": "^3.3.0",
-    "typescript": "^5"
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
   }
 }
