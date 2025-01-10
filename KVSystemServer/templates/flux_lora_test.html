@@ -74,138 +74,175 @@
             margin: 5px 0;
             color: #666;
         }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .home-button {
+            background-color: #6c757d;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .home-button:hover {
+            background-color: #5a6268;
+        }
     </style>
 </head>
 <body>
-    <h1>Flux GGUF Lora Image Generator</h1>
-    
-    <div class="form-group">
-        <label for="width">Width:</label>
-        <input type="number" id="width" value="1280" min="64" max="2048">
-        
-        <label for="height">Height:</label>
-        <input type="number" id="height" value="1024" min="64" max="2048">
-        
-        <label for="loraName">Lora Name:</label>
-        <input type="text" id="lora" value="NCMocha.safetensors" placeholder="Enter Lora name">
-        
-        <label for="modelName">Model Name (UNET):</label>
-        <input type="text" id="model" value="flux1-dev-Q4_0.gguf" placeholder="Enter model name">
-        
-        <label for="positivePrompt">Positive Prompt:</label>
-        <textarea id="positive" rows="4" placeholder="Enter positive prompt">Create a vibrant and engaging advertisement for coffee, featuring a cozy café setting with a warm, inviting atmosphere. In the foreground, there should be a close-up of a steaming cup of Nescafé Gold, highlighting its rich, creamy texture. The background should depict a picturesque landscape with mountains and a clear blue sky, with hot air balloons floating in the distance, evoking a sense of adventure and relaxation. The Nescafé Gold product should be prominently displayed, with the tagline 'Nescafé Gold Expertly Crafted with Care' clearly visible. The overall composition should convey the message that Nescafé Gold is not just a beverage, but an experience that brings people together and creates memorable moments. The color palette should be warm and inviting, with a mix of earthy tones and bright accents to draw the viewer's eye to the key elements of the image.</textarea>
-        
-        <label for="negativePrompt">Negative Prompt:</label>
-        <textarea id="negative" rows="4" placeholder="Enter negative prompt"></textarea>
-        
-        <label for="batchSize">Batch Size:</label>
-        <input type="number" id="batch" value="1" min="1" max="10">
-
-        <div class="additional-info">
-            <h3>Additional Information</h3>
-            <ul>
-                <li>Steps: 22</li>
-                <li>CFG: 1</li>
-                <li>Sampler: euler</li>
-                <li>Scheduler: simple</li>
-                <li>CLIP Model: t5-v1_1-xxl-encoder-Q5_K_M.gguf</li>
-                <li>VAE Model: ae.safetensors</li>
-            </ul>
+    <div class="container">
+        <div class="header">
+            <h1>Flux GGUF Lora Image Generator</h1>
+            <a href="/" class="home-button">← Back to Home</a>
         </div>
-        
-        <button onclick="generateImages()" id="generate">Generate Images</button>
-    </div>
-
-    <div id="status"></div>
-    <div id="output"></div>
-
-    <script>
-        async function generateImages() {
-            const status = document.getElementById('status');
-            const output = document.getElementById('output');
-            const generateBtn = document.getElementById('generate');
+        <div class="form-group">
+            <label for="width">Width:</label>
+            <input type="number" id="width" value="1280" min="64" max="2048">
             
-            // Clear previous output
-            status.textContent = 'Generating images...';
-            status.className = 'processing';
-            output.innerHTML = '';
-            generateBtn.disabled = true;
+            <label for="height">Height:</label>
+            <input type="number" id="height" value="1024" min="64" max="2048">
             
-            try {
-                const response = await fetch('/generate_flux_lora', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        width: parseInt(document.getElementById('width').value),
-                        height: parseInt(document.getElementById('height').value),
-                        lora_name: document.getElementById('lora').value,
-                        model_name: document.getElementById('model').value,
-                        positive_prompt: document.getElementById('positive').value,
-                        negative_prompt: document.getElementById('negative').value,
-                        batch_size: parseInt(document.getElementById('batch').value)
-                    })
-                });
+            <label for="loraName">Lora Name:</label>
+            <input type="text" id="lora" value="NCMocha.safetensors" placeholder="Enter Lora name">
+            
+            <label for="modelName">Model Name (UNET):</label>
+            <input type="text" id="model" value="flux1-dev-Q4_0.gguf" placeholder="Enter model name">
+            
+            <label for="product">Product:</label>
+            <input type="text" id="product" value="Some Product" placeholder="Enter product name">
+            
+            <label for="style">Style:</label>
+            <input type="text" id="style" value="Some Style" placeholder="Enter style">
+            
+            <label for="positivePrompt">Positive Prompt:</label>
+            <textarea id="positive" rows="4" placeholder="Enter positive prompt">Create a vibrant and engaging advertisement for coffee, featuring a cozy café setting with a warm, inviting atmosphere. In the foreground, there should be a close-up of a steaming cup of Nescafé Gold, highlighting its rich, creamy texture. The background should depict a picturesque landscape with mountains and a clear blue sky, with hot air balloons floating in the distance, evoking a sense of adventure and relaxation. The Nescafé Gold product should be prominently displayed, with the tagline 'Nescafé Gold Expertly Crafted with Care' clearly visible. The overall composition should convey the message that Nescafé Gold is not just a beverage, but an experience that brings people together and creates memorable moments. The color palette should be warm and inviting, with a mix of earthy tones and bright accents to draw the viewer's eye to the key elements of the image.</textarea>
+            
+            <label for="negativePrompt">Negative Prompt:</label>
+            <textarea id="negative" rows="4" placeholder="Enter negative prompt"></textarea>
+            
+            <label for="batchSize">Batch Size:</label>
+            <input type="number" id="batch" value="1" min="1" max="10">
+
+            <div class="additional-info">
+                <h3>Additional Information</h3>
+                <ul>
+                    <li>Steps: 22</li>
+                    <li>CFG: 1</li>
+                    <li>Sampler: euler</li>
+                    <li>Scheduler: simple</li>
+                    <li>CLIP Model: t5-v1_1-xxl-encoder-Q5_K_M.gguf</li>
+                    <li>VAE Model: ae.safetensors</li>
+                </ul>
+            </div>
+            
+            <button onclick="generateImages()" id="generate">Generate Images</button>
+        </div>
+
+        <div id="status"></div>
+        <div id="output"></div>
+
+        <script>
+            async function generateImages() {
+                const status = document.getElementById('status');
+                const output = document.getElementById('output');
+                const generateBtn = document.getElementById('generate');
                 
-                console.log('Response status:', response.status);
-                const result = await response.json();
-                console.log('Response data:', result);
+                // Clear previous output
+                status.textContent = 'Generating images...';
+                status.className = 'processing';
+                output.innerHTML = '';
+                generateBtn.disabled = true;
                 
-                if (result) {
-                    status.className = 'success';
-                    status.textContent = 'Images generated successfully!';
+                try {
+                    const response = await fetch('/generate_flux_lora', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            width: parseInt(document.getElementById('width').value),
+                            height: parseInt(document.getElementById('height').value),
+                            lora_name: document.getElementById('lora').value,
+                            model_name: document.getElementById('model').value,
+                            product: document.getElementById('product').value,
+                            style: document.getElementById('style').value,
+                            positive_prompt: document.getElementById('positive').value,
+                            negative_prompt: document.getElementById('negative').value,
+                            batch_size: parseInt(document.getElementById('batch').value)
+                        })
+                    });
                     
-                    // Handle the returned image data
-                    for (const nodeId in result) {
-                        const images = result[nodeId];
-                        images.forEach((imageData, index) => {
-                            // Create a container for the image and metadata
-                            const container = document.createElement('div');
-                            container.style.border = '1px solid #ddd';
-                            container.style.padding = '10px';
-                            container.style.borderRadius = '4px';
-                            
-                            // Create and set up the image element
-                            const img = document.createElement('img');
-                            img.style.width = '100%';
-                            img.style.height = 'auto';
-                            img.style.marginBottom = '10px';
-                            
-                            // Set the image source to the URL from Supabase
-                            if (imageData.image_url) {
-                                img.src = imageData.image_url;
-                            } else {
-                                console.error('No image URL provided');
-                                container.innerHTML = '<p class="error">Error: No image URL available</p>';
-                                return;
-                            }
-                            
-                            // Add metadata display
-                            const metadata = document.createElement('div');
-                            metadata.className = 'metadata';
-                            metadata.innerHTML = `
-                                <p><strong>Generated:</strong> ${new Date(imageData.generated_at).toLocaleString()}</p>
-                                <p><strong>Resolution:</strong> ${imageData.resolution}</p>
-                                <p><strong>Seed:</strong> ${imageData.seed}</p>
-                            `;
-                            
-                            container.appendChild(img);
-                            container.appendChild(metadata);
-                            output.appendChild(container);
-                        });
+                    console.log('Response status:', response.status);
+                    const result = await response.json();
+                    console.log('Response data:', result);
+                    
+                    if (result) {
+                        status.className = 'success';
+                        status.textContent = 'Images generated successfully!';
+                        
+                        // Handle the returned image data
+                        for (const nodeId in result) {
+                            const images = result[nodeId];
+                            images.forEach((imageData, index) => {
+                                // Create a container for the image and metadata
+                                const container = document.createElement('div');
+                                container.style.border = '1px solid #ddd';
+                                container.style.padding = '10px';
+                                container.style.borderRadius = '4px';
+                                
+                                // Create and set up the image element
+                                const img = document.createElement('img');
+                                img.style.width = '100%';
+                                img.style.height = 'auto';
+                                img.style.marginBottom = '10px';
+                                
+                                // Set the image source to the URL from Supabase
+                                if (imageData.image_url) {
+                                    img.src = imageData.image_url;
+                                } else {
+                                    console.error('No image URL provided');
+                                    container.innerHTML = '<p class="error">Error: No image URL available</p>';
+                                    return;
+                                }
+                                
+                                // Add metadata display
+                                const metadata = document.createElement('div');
+                                metadata.className = 'metadata';
+                                metadata.innerHTML = `
+                                    <p><strong>Generated:</strong> ${new Date(imageData.generated_at).toLocaleString()}</p>
+                                    <p><strong>Resolution:</strong> ${imageData.resolution}</p>
+                                    <p><strong>Seed:</strong> ${imageData.seed}</p>
+                                `;
+                                
+                                container.appendChild(img);
+                                container.appendChild(metadata);
+                                output.appendChild(container);
+                            });
+                        }
+                    } else {
+                        throw new Error('No result received from server');
                     }
-                } else {
-                    throw new Error('No result received from server');
+                } catch (error) {
+                    console.error('Error:', error);
+                    status.className = 'error';
+                    status.textContent = `Error: ${error.message}`;
+                } finally {
+                    generateBtn.disabled = false;
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                status.className = 'error';
-                status.textContent = `Error: ${error.message}`;
-            } finally {
-                generateBtn.disabled = false;
             }
-        }
-    </script>
+        </script>
+    </div>
 </body>
 </html>

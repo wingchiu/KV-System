@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { Database } from '@/lib/database.types'
+// import { Database } from '@/lib/database.types'
 import HistoryGrid from '@/components/history/HistoryGrid'
 import { ImageGeneration } from '@/lib/types'
 import { useToast } from '@/components/ui/use-toast'
@@ -10,7 +10,7 @@ import { useToast } from '@/components/ui/use-toast'
 export default function HistoryPage() {
   const [images, setImages] = useState<ImageGeneration[]>([])
   const [isDeleting, setIsDeleting] = useState(false)
-  const supabase = createClientComponentClient<Database>()
+  const supabase = createClientComponentClient()
   const { toast } = useToast()
 
   useEffect(() => {

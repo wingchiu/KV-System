@@ -25,6 +25,13 @@ export default function PromptEditor() {
   const [variants, setVariants] = useState(1)
   const [autoHistory, setAutoHistory] = useState(true)
   const [generatedImage, setGeneratedImage] = useState<string | null>(null)
+  const [generatedImages, setGeneratedImages] = useState<Array<{
+    image_url: string;
+    generated_at: string;
+    resolution: string;
+    seed: number;
+  }>>([])
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   useEffect(() => {
     if (selectedStyle) {
@@ -45,9 +52,10 @@ export default function PromptEditor() {
     try {
       setIsGenerating(true);
       setGeneratedImage(null);
+      setGeneratedImages([]);
 
-      // Extract LoRA name from path (e.g., 'models/loras/my_lora.safetensors' -> 'my_lora')
-      const lora_name = selectedProduct.lora_path.split('/').pop()?.replace('.safetensors', '') || selectedProduct.lora_path;
+      // Extract LoRA name from path
+      const lora_name = selectedProduct.lora_path.split('/').pop() || "";
       console.log('[Generate] Product:', {
         name: selectedProduct.name,
         lora_path: selectedProduct.lora_path,
@@ -62,32 +70,18 @@ export default function PromptEditor() {
         combined_prompt: combinedPrompt
       });
 
-      // Prepare the request payload according to the API spec
       const payload = {
-        width: width,
-        height: height,
-        model_name: "flux1-dev-Q4_0.gguf",    // Base model name
-        lora_name: selectedProduct.lora_path.split('/').pop() || "",  // Just the filename without path
+        width,
+        height,
+        lora_name,
         positive_prompt: combinedPrompt,
         negative_prompt: "",
         batch_size: variants
       };
 
-      // Validate lora_name is one of the allowed values
-      const allowedLoras = [
-        'F.1电商系列-场景插画_V1.0.safetensors',
-        'Flux_小红书真实风格丨日常照片丨极致逼真_V1.safetensors',
-        'NCMocha.safetensors',
-        'XLabs F.1 Realism LoRA_V1.safetensors'
-      ];
-
-      if (!allowedLoras.includes(payload.lora_name)) {
-        throw new Error(`Invalid LoRA name. Must be one of: ${allowedLoras.join(', ')}`);
-      }
-
       console.log('[Generate] Sending request with payload:', JSON.stringify(payload, null, 2));
 
-      const response = await fetch('/api/generate_flux_lora', {
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,33 +92,45 @@ export default function PromptEditor() {
       const data = await response.json();
       console.log('[Generate] Received response:', data);
 
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to generate image');
+      if (!data || Object.keys(data).length === 0) {
+        throw new Error('No result received from server');
       }
 
-      if (!data.images || data.images.length === 0) {
-        throw new Error('No images were generated');
+      // Process all images from all nodes
+      const allImages: Array<{
+        image_url: string;
+        generated_at: string;
+        resolution: string;
+        seed: number;
+      }> = [];
+
+      for (const nodeId in data) {
+        const images = data[nodeId];
+        if (Array.isArray(images)) {
+          images.forEach(imageData => {
+            if (imageData.image_url) {
+              allImages.push({
+                image_url: imageData.image_url,
+                generated_at: imageData.generated_at || new Date().toISOString(),
+                resolution: `${width}x${height}`,
+                seed: imageData.seed || 0
+              });
+            }
+          });
+        }
       }
 
-      // Log image data info for debugging
-      const imageData = data.images[0];
-      console.log('Image data type:', typeof imageData);
-      console.log('Image data length:', imageData.length);
-      if (typeof imageData === 'string') {
-        console.log('Image data preview:', imageData.substring(0, 100));
+      if (allImages.length === 0) {
+        throw new Error('No valid images were generated');
       }
 
-      // Set the image URL with proper data URL prefix if needed
-      const imageUrl = imageData.startsWith('data:image') 
-        ? imageData 
-        : `data:image/png;base64,${imageData}`;
-
-      console.log('[Generate] Setting image URL:', imageUrl.substring(0, 100) + '...');
-      setGeneratedImage(imageUrl);
+      setGeneratedImages(allImages);
+      setCurrentImageIndex(0);
+      setGeneratedImage(allImages[0].image_url);
 
       toast({
         title: "Success",
-        description: "Image generated successfully",
+        description: "Images generated successfully",
       });
 
       if (autoHistory) {
@@ -149,10 +155,10 @@ export default function PromptEditor() {
 
   const handleAddToHistory = async () => {
     if (!selectedStyle || !selectedProduct || !generatedImage) {
-      toast({
-        title: "Error",
-        description: "No image to add to history",
-        variant: "destructive",
+      console.log('[History] Missing required data:', {
+        hasStyle: Boolean(selectedStyle),
+        hasProduct: Boolean(selectedProduct),
+        hasImage: Boolean(generatedImage)
       });
       return;
     }
@@ -164,8 +170,8 @@ export default function PromptEditor() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          image_url: generatedImage,
-          prompt,
+          image_url: generatedImages[currentImageIndex].image_url,
+          prompt: selectedStyle.prompt,
           style_id: selectedStyle.id,
           product_id: selectedProduct.id,
           width,
@@ -183,11 +189,8 @@ export default function PromptEditor() {
         description: "Image added to history",
       });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add image to history",
-        variant: "destructive",
-      });
+      console.error('[History] Error:', error);
+      // Don't show error toast to user since this is a background operation
     }
   };
 
@@ -279,43 +282,76 @@ export default function PromptEditor() {
       </div>
 
       <div className="space-y-4">
-        <Card className="p-4 flex items-center justify-center min-h-[512px] relative bg-muted">
-          {generatedImage ? (
-            <div className="relative w-full h-full flex items-center justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={generatedImage}
-                alt="Generated image"
-                style={{
-                  maxWidth: '100%',
-                  height: 'auto',
-                  marginBottom: '10px'
-                }}
-                onLoad={() => {
-                  console.log('[Generate] Image loaded successfully');
-                  toast({
-                    title: "Success",
-                    description: "Image loaded successfully",
-                  });
-                }}
-                onError={(e) => {
-                  console.error('[Generate] Image load error:', e);
-                  console.log('Failed image URL:', generatedImage?.substring(0, 100));
-                  toast({
-                    title: "Error",
-                    description: "Failed to load generated image",
-                    variant: "destructive",
-                  });
-                }}
-              />
+        {isGenerating ? (
+          <Card className="p-4 flex items-center justify-center h-[512px]">
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <p>Generating image...</p>
             </div>
-          ) : (
+          </Card>
+        ) : generatedImage ? (
+          <Card className="p-4 relative">
+            <div className="relative flex flex-col h-[512px]">
+              <div className="flex-1 relative overflow-hidden">
+                <img 
+                  src={generatedImages[currentImageIndex].image_url} 
+                  alt="Generated" 
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    console.error('[Generate] Image load error for URL:', generatedImages[currentImageIndex].image_url);
+                    toast({
+                      title: "Error",
+                      description: "Failed to load generated image. Please try again.",
+                      variant: "destructive",
+                    });
+                  }}
+                  onLoad={() => {
+                    console.log('[Generate] Image loaded successfully:', generatedImages[currentImageIndex].image_url);
+                  }}
+                />
+                {generatedImages.length > 1 && (
+                  <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setCurrentImageIndex((prev) => 
+                        prev > 0 ? prev - 1 : generatedImages.length - 1
+                      )}
+                      disabled={isGenerating}
+                    >
+                      Previous
+                    </Button>
+                    <span className="bg-black bg-opacity-50 text-white px-2 py-1 rounded">
+                      {currentImageIndex + 1} / {generatedImages.length}
+                    </span>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setCurrentImageIndex((prev) => 
+                        prev < generatedImages.length - 1 ? prev + 1 : 0
+                      )}
+                      disabled={isGenerating}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </div>
+              <div className="mt-2 text-sm text-muted-foreground">
+                <p>Generated: {new Date(generatedImages[currentImageIndex].generated_at).toLocaleString()}</p>
+                <p>Resolution: {generatedImages[currentImageIndex].resolution}</p>
+                <p>Seed: {generatedImages[currentImageIndex].seed}</p>
+              </div>
+            </div>
+          </Card>
+        ) : (
+          <Card className="p-4 flex items-center justify-center h-[512px] bg-muted">
             <div className="text-center text-muted-foreground">
               Generated image will appear here
             </div>
-          )}
-        </Card>
-
+          </Card>
+        )}
+        
         <div className="flex items-center justify-between">
           <Button 
             variant="outline" 

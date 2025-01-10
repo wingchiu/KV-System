@@ -13,6 +13,7 @@ interface ProductFormProps {
   initialData?: Product
   onSubmit: (data: FormData) => Promise<void>
   loading: boolean
+  type?: 'product' | 'white'
 }
 
 interface FormData {
@@ -25,7 +26,7 @@ interface FormData {
   imagePreview: string | null
 }
 
-export default function ProductForm({ initialData, onSubmit, loading }: ProductFormProps) {
+export default function ProductForm({ initialData, onSubmit, loading, type = 'product' }: ProductFormProps) {
   const [formData, setFormData] = useState<FormData>({
     name: initialData?.name || '',
     description: initialData?.description || '',
@@ -60,8 +61,10 @@ export default function ProductForm({ initialData, onSubmit, loading }: ProductF
     }
   }
 
-  const handleSubmit = async () => {
-    if (!formData.name || !formData.description || !formData.product_type || !formData.lora_path) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!formData.name || !formData.description || !formData.product_type || (type === 'product' && !formData.lora_path)) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields",
@@ -79,31 +82,56 @@ export default function ProductForm({ initialData, onSubmit, loading }: ProductF
       return
     }
 
-    await onSubmit(formData)
+    try {
+      await onSubmit(formData)
+      // Reset form after successful submission if it's not editing mode
+      if (!initialData) {
+        setFormData({
+          name: '',
+          description: '',
+          category: 'coffee',
+          product_type: '',
+          lora_path: '',
+          image: null,
+          imagePreview: null
+        })
+        // Reset file input
+        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+        if (fileInput) {
+          fileInput.value = ''
+        }
+      }
+    } catch (error) {
+      console.error('Form submission error:', error)
+    }
   }
 
   return (
-    <div className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <Input
-        placeholder="Product Name"
+        placeholder={`${type === 'product' ? 'Product' : 'White Product'} Name`}
         value={formData.name}
         onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+        required
       />
       <Textarea
         placeholder="Product Description"
         value={formData.description}
         onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+        className="h-20"
       />
       <Input
         placeholder="Product Type"
         value={formData.product_type}
         onChange={(e) => setFormData(prev => ({ ...prev, product_type: e.target.value }))}
       />
-      <Input
-        placeholder="Lora Filename"
-        value={formData.lora_path}
-        onChange={(e) => setFormData(prev => ({ ...prev, lora_path: e.target.value }))}
-      />
+      {type === 'product' && (
+        <Input
+          placeholder="Lora Filename"
+          value={formData.lora_path}
+          onChange={(e) => setFormData(prev => ({ ...prev, lora_path: e.target.value }))}
+        />
+      )}
       <select
         className="w-full p-2 border rounded-md"
         value={formData.category}
@@ -134,7 +162,7 @@ export default function ProductForm({ initialData, onSubmit, loading }: ProductF
         )}
       </div>
       <Button 
-        onClick={handleSubmit}
+        type="submit" 
         disabled={loading}
       >
         {loading ? (
@@ -145,10 +173,10 @@ export default function ProductForm({ initialData, onSubmit, loading }: ProductF
         ) : (
           <>
             <Plus className="h-4 w-4 mr-2" />
-            {initialData ? 'Update Product' : 'Add Product'}
+            {initialData ? 'Update Product' : `Add ${type === 'product' ? 'Product' : 'White Product'}`}
           </>
         )}
       </Button>
-    </div>
+    </form>
   )
 }

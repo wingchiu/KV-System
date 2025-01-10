@@ -3,186 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Prompt Generator</title>
+    <title>KV System Test Suite</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            line-height: 1.6;
+            background-color: #f5f5f5;
         }
         .container {
-            background-color: #f5f5f5;
-            border-radius: 5px;
-            padding: 20px;
-            margin-top: 20px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         h1 {
             color: #333;
+            margin-bottom: 30px;
             text-align: center;
         }
-        .upload-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
+        .test-links {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         }
-        .file-input {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+        .test-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .submit-btn {
+        .test-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .test-card h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        .test-card p {
+            color: #6c757d;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .test-link {
+            display: inline-block;
             background-color: #4CAF50;
             color: white;
-            padding: 12px 20px;
-            border: none;
+            text-decoration: none;
+            padding: 10px 20px;
             border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
+            transition: background-color 0.2s;
         }
-        .submit-btn:hover {
+        .test-link:hover {
             background-color: #45a049;
-        }
-        .submit-btn:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            display: none;
-        }
-        .error {
-            color: #ff0000;
-            margin-top: 10px;
-            display: none;
-        }
-        .status {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            display: none;
-        }
-        .step {
-            margin: 5px 0;
-            padding: 5px;
-            border-radius: 3px;
-        }
-        .step.success {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-        }
-        .step.error {
-            background-color: #ffebee;
-            color: #c62828;
-            display: block;
-        }
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-        }
-        .loading:after {
-            content: '...';
-            animation: dots 1s steps(5, end) infinite;
-        }
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60% { content: '...'; }
-            80% { content: '....'; }
-            100% { content: '.....'; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Image Prompt Generator</h1>
-        <form id="uploadForm" class="upload-form">
-            <input type="file" id="imageInput" class="file-input" accept="image/*" required>
-            <button type="submit" class="submit-btn">Generate Prompt</button>
-        </form>
-        <div id="loading" class="loading">Processing image</div>
-        <div id="status" class="status"></div>
-        <div id="error" class="error"></div>
-        <div id="result" class="result"></div>
+        <h1>KV System Test Suite</h1>
+        <div class="test-links">
+            <div class="test-card">
+                <h2>Prompt Generator</h2>
+                <p>Generate prompts from images using AI-powered image analysis.</p>
+                <a href="/promptgenerator" class="test-link">Open Prompt Generator</a>
+            </div>
+            <div class="test-card">
+                <h2>LLM Test</h2>
+                <p>Test the Large Language Model capabilities and responses.</p>
+                <a href="/llm_test" class="test-link">Open LLM Test</a>
+            </div>
+            <div class="test-card">
+                <h2>Flux Lora Test</h2>
+                <p>Test image generation using Flux Lora models.</p>
+                <a href="/flux_lora_test" class="test-link">Open Flux Lora Test</a>
+            </div>
+        </div>
     </div>
-
-    <script>
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData();
-            const imageFile = document.getElementById('imageInput').files[0];
-            const errorDiv = document.getElementById('error');
-            const resultDiv = document.getElementById('result');
-            const statusDiv = document.getElementById('status');
-            const loadingDiv = document.getElementById('loading');
-            const submitBtn = document.querySelector('.submit-btn');
-            
-            if (!imageFile) {
-                errorDiv.textContent = 'Please select an image file';
-                errorDiv.style.display = 'block';
-                resultDiv.style.display = 'none';
-                statusDiv.style.display = 'none';
-                return;
-            }
-            
-            // Reset displays
-            errorDiv.style.display = 'none';
-            resultDiv.style.display = 'none';
-            statusDiv.style.display = 'none';
-            loadingDiv.style.display = 'block';
-            submitBtn.disabled = true;
-            
-            formData.append('image', imageFile);
-            
-            try {
-                const response = await fetch('/generate_prompt', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                // Update status display
-                statusDiv.innerHTML = '<h3>Processing Steps:</h3>';
-                data.steps.forEach(step => {
-                    const stepDiv = document.createElement('div');
-                    stepDiv.className = `step ${step.success ? 'success' : 'error'}`;
-                    stepDiv.textContent = `${step.name}: ${step.success ? 'Success' : 'Failed'}`;
-                    if (step.error) {
-                        const errorDiv = document.createElement('div');
-                        errorDiv.textContent = `Error: ${step.error}`;
-                        stepDiv.appendChild(errorDiv);
-                    }
-                    statusDiv.appendChild(stepDiv);
-                });
-                statusDiv.style.display = 'block';
-                
-                if (data.success) {
-                    errorDiv.style.display = 'none';
-                    resultDiv.textContent = data.prompt;
-                    resultDiv.style.display = 'block';
-                } else {
-                    errorDiv.textContent = data.error || 'An error occurred';
-                    errorDiv.style.display = 'block';
-                    resultDiv.style.display = 'none';
-                }
-            } catch (error) {
-                errorDiv.textContent = 'Failed to connect to the server';
-                errorDiv.style.display = 'block';
-                resultDiv.style.display = 'none';
-            } finally {
-                loadingDiv.style.display = 'none';
-                submitBtn.disabled = false;
-            }
-        });
-    </script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase'
+// import { createServerClient } from '@/lib/supabase'
 import { cookies } from 'next/headers'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 
 export async function DELETE(
   request: Request,
@@ -8,7 +9,10 @@ export async function DELETE(
 ) {
   try {
     const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
+    const supabase = createRouteHandlerClient({cookies: () => cookieStore}, {
+      supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL
+    })
     const { id } = params
 
     // Delete the image from storage

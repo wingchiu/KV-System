@@ -46,13 +46,13 @@ export default function HistoryGrid({ images, onToggleFavorite, onDownload, onDe
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {currentImages.map((image) => (
           <div key={image.id} className="relative group bg-card rounded-lg overflow-hidden">
-            <div className="aspect-square relative">
+            <div className="relative h-[320px]">
               {image.image_url && (
                 <Image
                   src={image.image_url}
                   alt={image.prompt || 'Generated image'}
                   fill
-                  className="object-cover transition-transform group-hover:scale-105"
+                  className="object-contain transition-transform group-hover:scale-105"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
               )}
@@ -189,7 +189,6 @@ export default function HistoryGrid({ images, onToggleFavorite, onDownload, onDe
                   sizes="(max-width: 1280px) 100vw, 1280px"
                 />
               </div>
-              
               <div className="flex-1 overflow-y-auto p-6">
                 <div>
                   <h3 className="text-lg font-medium mb-2">Prompt</h3>

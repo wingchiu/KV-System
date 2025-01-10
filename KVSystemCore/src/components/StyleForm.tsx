@@ -13,6 +13,7 @@ interface StyleFormProps {
   initialData?: KVStyle
   onSubmit: (data: FormData) => Promise<void>
   loading: boolean
+  type?: 'style' | 'background'
 }
 
 interface FormData {
@@ -22,7 +23,7 @@ interface FormData {
   imagePreview: string | null
 }
 
-export default function StyleForm({ initialData, onSubmit, loading }: StyleFormProps) {
+export default function StyleForm({ initialData, onSubmit, loading, type = 'style' }: StyleFormProps) {
   const [formData, setFormData] = useState<FormData>({
     name: initialData?.name || '',
     prompt: initialData?.prompt || '',
@@ -105,7 +106,7 @@ export default function StyleForm({ initialData, onSubmit, loading }: StyleFormP
       console.log('VLM service response:', data);
       
       if (!data.success) {
-        const errorMessage = data.error || data.steps?.find(step => !step.success)?.error || 'Failed to generate prompt';
+        const errorMessage = data.error || data.steps?.find((step: any) => !step.success)?.error || 'Failed to generate prompt';
         console.error('VLM service process failed:', errorMessage);
         throw new Error(errorMessage);
       }
@@ -134,7 +135,9 @@ export default function StyleForm({ initialData, onSubmit, loading }: StyleFormP
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     if (!formData.name || !formData.prompt) {
       toast({
         title: "Validation Error",
@@ -175,16 +178,18 @@ export default function StyleForm({ initialData, onSubmit, loading }: StyleFormP
   }
 
   return (
-    <div className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <Input
-        placeholder="Style Name"
+        placeholder={`${type === 'style' ? 'Style' : 'Background'} Name`}
         value={formData.name}
         onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+        required
       />
       <Textarea
-        placeholder="Style Prompt"
+        placeholder="Prompt"
         value={formData.prompt}
         onChange={(e) => setFormData(prev => ({ ...prev, prompt: e.target.value }))}
+        className="h-20"
       />
       <div className="space-y-2">
         <Input
@@ -224,22 +229,22 @@ export default function StyleForm({ initialData, onSubmit, loading }: StyleFormP
           )}
         </Button>
         <Button 
-          onClick={handleSubmit}
+          type="submit"
           disabled={loading}
         >
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {initialData ? 'Updating...' : 'Adding...'}
+              Adding...
             </>
           ) : (
             <>
               <Plus className="h-4 w-4 mr-2" />
-              {initialData ? 'Update Style' : 'Add Style'}
+              Add {type === 'style' ? 'Style' : 'Background'}
             </>
           )}
         </Button>
       </div>
-    </div>
+    </form>
   )
 }

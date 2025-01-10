@@ -21,21 +21,30 @@ COMFYUI_OUTPUT_DIR = os.path.join("D:", "ComfyUI", "ComfyUI", "output")  # Adjus
 async def home():
     return await render_template('index.html')
 
+@app.route('/promptgenerator')
+async def promptgenerator():
+    return await render_template('promptgenerator.html')
+
 @app.route('/flux_lora_test')
 async def flux_lora_test():
     return await render_template('flux_lora_test.html')
 
+@app.route('/llm_test')
+async def llm_test():
+    return await render_template('llm_test.html')
+
 @app.route('/generate_prompt', methods=['POST'])
 async def generate_prompt():
     try:
-        if 'image' not in request.files:
+        files = await request.files
+        if 'image' not in files:
             return jsonify({
                 'success': False,
                 'error': 'No image file provided',
                 'steps': []
             }), 400
             
-        image_file = await request.files['image']
+        image_file = files['image']
         if image_file.filename == '':
             return jsonify({
                 'success': False,
@@ -71,7 +80,7 @@ async def generate_flux_lora():
         data = await request.get_json()
         print(f"Request data: {data}")
         
-        required_fields = ['width', 'height', 'lora_name', 'positive_prompt', 'negative_prompt', 'batch_size']
+        required_fields = ['width', 'height', 'lora_name', 'positive_prompt', 'negative_prompt', 'batch_size', 'product','style']
         
         # Validate required fields
         for field in required_fields:
@@ -92,7 +101,9 @@ async def generate_flux_lora():
                 lora_name=data['lora_name'],
                 positive_prompt=data['positive_prompt'],
                 negative_prompt=data['negative_prompt'],
-                batch_size=data['batch_size']
+                batch_size=data['batch_size'],
+                product=data['product'],
+                style=data['style']
             )
         
         if result is not None:

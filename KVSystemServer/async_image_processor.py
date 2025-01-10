@@ -269,7 +269,19 @@ class AsyncImageProcessor:
             
             try:
                 # Load the workflow template
-                with open("workflow/MiniCPMV Prompt Creator Ali.json", "r") as f:
+                workflow_path = os.path.join(os.path.dirname(__file__), "workflow", "MiniCPMV Prompt Creator Ali.json")
+                if not os.path.exists(workflow_path):
+                    error_msg = f"Workflow file not found: {workflow_path}"
+                    logger.error(error_msg)
+                    status["steps"].append({
+                        "name": "load_workflow",
+                        "success": False,
+                        "error": error_msg
+                    })
+                    status["error"] = error_msg
+                    return status
+
+                with open(workflow_path, "r") as f:
                     workflow = json.load(f)
                 logger.debug("Workflow loaded successfully")
                     

@@ -13,9 +13,10 @@ interface ProductListProps {
   products: Product[]
   onDelete: (id: number) => Promise<void>
   onUpdate: (id: number, data: any) => Promise<void>
+  type?: 'product' | 'white'
 }
 
-export default function ProductList({ products, onDelete, onUpdate }: ProductListProps) {
+export default function ProductList({ products, onDelete, onUpdate, type = 'product' }: ProductListProps) {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
 
   const handleUpdate = async (data: any) => {

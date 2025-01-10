@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Search, Home, Settings, History } from 'lucide-react'
+import { Search, Home, Settings, History, User, ImageDown } from 'lucide-react'
 import { Input } from './ui/input'
 import Image from 'next/image'
 
@@ -36,6 +36,20 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-6">
+          <Link 
+            href="#"
+            className="flex flex-col items-center gap-1 text-sm font-medium transition-colors hover:text-amber-500 group"
+          >
+            <User className="h-5 w-5 group-hover:text-amber-500" />
+            <span>Social Generation</span>
+          </Link>
+          <Link 
+            href="/bg-replacement"
+            className="flex flex-col items-center gap-1 text-sm font-medium transition-colors hover:text-amber-500 group"
+          >
+            <ImageDown className="h-5 w-5 group-hover:text-amber-500" />
+            <span>BG Replacement</span>
+          </Link>
           <Link 
             href="/"
             className="flex flex-col items-center gap-1 text-sm font-medium transition-colors hover:text-amber-500 group"
