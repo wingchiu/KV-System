@@ -1,0 +1,123 @@
+{
+  "1": {
+    "inputs": {
+      "folder_path": "Path to your image folder",
+      "caption_method": "long_prompt",
+      "max_new_tokens": 2048,
+      "num_beams": 3,
+      "prefix_caption": "",
+      "suffix_caption": "",
+      "replace_tags": "replace_tags eg:search1:replace1;search2:replace2",
+      "images": [
+        "3",
+        0
+      ]
+    },
+    "class_type": "Prompt_Generator",
+    "_meta": {
+      "title": "🐾Prompt_Generator"
+    }
+  },
+  "3": {
+    "inputs": {
+      "image": "851ce4e51eba68f0db0fd6a72bb5164a.jpg",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "4": {
+    "inputs": {
+      "text": [
+        "1",
+        2
+      ],
+      "text2": "Midjourney-style long prompt for generating high-quality images:\nA vibrant red background sets the stage for a dynamic scene. In the center, a can of Coca-Cola Café Espresso stands tall, its label prominently displaying the brand's iconic logo. Suddenly, with a burst of energy, coffee beans are seen flying out of the can, creating a dramatic splash effect. The beans, rich in color and texture, appear to be suspended in mid-air, adding a sense of motion and excitement to the composition. The vivid red backdrop enhances the contrast, making the can and the flying beans the focal points of the image. The overall composition is balanced, with the can positioned slightly off-center, drawing the viewer's eye across the scene. This image captures the essence of a refreshing, energetic beverage, ready to be enjoyed."
+    },
+    "class_type": "ShowText|pysssss",
+    "_meta": {
+      "title": "Show Text 🐍"
+    }
+  },
+  "9": {
+    "inputs": {
+      "model_name": "Qwen/Qwen2-7B-Instruct"
+    },
+    "class_type": "Qwen2_ModelLoader_Zho",
+    "_meta": {
+      "title": "⛱️Qwen2 ModelLoader"
+    }
+  },
+  "11": {
+    "inputs": {
+      "text": [
+        "12",
+        0
+      ],
+      "text2": "In the following prompt, please\n\n1. Filter out product specific brand name. e.g. Mcdonald, P&G\n2. Filter out any midjorney specific instruction in the prompt. \n3. if there is no specific things to filter, just keep the original prompt\n4. Just give the prompt only.\n\nThe prompt starting here - Midjourney-style long prompt for generating high-quality images:\nA vibrant red background sets the stage for a dynamic scene. In the center, a can of Coca-Cola Café Espresso stands tall, its label prominently displaying the brand's iconic logo. Suddenly, with a burst of energy, coffee beans are seen flying out of the can, creating a dramatic splash effect. The beans, rich in color and texture, appear to be suspended in mid-air, adding a sense of motion and excitement to the composition. The vivid red backdrop enhances the contrast, making the can and the flying beans the focal points of the image. The overall composition is balanced, with the can positioned slightly off-center, drawing the viewer's eye across the scene. This image captures the essence of a refreshing, energetic beverage, ready to be enjoyed."
+    },
+    "class_type": "ShowText|pysssss",
+    "_meta": {
+      "title": "Show Text 🐍"
+    }
+  },
+  "12": {
+    "inputs": {
+      "text1": "In the following prompt, please\n\n1. Filter out product specific brand name. e.g. Mcdonald, P&G\n2. Filter out any midjorney specific instruction in the prompt. \n3. if there is no specific things to filter, just keep the original prompt\n4. Just give the prompt only.\n\nThe prompt starting here",
+      "text2": [
+        "4",
+        0
+      ],
+      "separator": " - "
+    },
+    "class_type": "Concat Text _O",
+    "_meta": {
+      "title": "Concat Text _O"
+    }
+  },
+  "15": {
+    "inputs": {
+      "model_name": "Qwen/Qwen2-7B-Instruct"
+    },
+    "class_type": "Qwen2_ModelLoader_Zho",
+    "_meta": {
+      "title": "⛱️Qwen2 ModelLoader"
+    }
+  },
+  "18": {
+    "inputs": {
+      "prompt": [
+        "11",
+        0
+      ],
+      "system_instruction": "",
+      "model": [
+        "15",
+        0
+      ],
+      "tokenizer": [
+        "15",
+        1
+      ]
+    },
+    "class_type": "Qwen2_Zho",
+    "_meta": {
+      "title": "⛱️Qwen2"
+    }
+  },
+  "19": {
+    "inputs": {
+      "text": [
+        "18",
+        0
+      ],
+      "text2": "A vibrant red background sets the stage for a dynamic scene. In the center, a can stands tall, its label displaying an iconic logo. Suddenly, with a burst of energy, objects are seen flying out of the can, creating a dramatic splash effect. The objects, rich in color and texture, appear to be suspended in mid-air, adding a sense of motion and excitement to the composition. The vivid red backdrop enhances the contrast, making the can and the flying objects the focal points of the image. The overall composition is balanced, with the can positioned slightly off-center, drawing the viewer's eye across the scene. This image captures the essence of a refreshing, energetic beverage, ready to be enjoyed."
+    },
+    "class_type": "ShowText|pysssss",
+    "_meta": {
+      "title": "Show Text 🐍"
+    }
+  }
+}

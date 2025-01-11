@@ -202,11 +202,11 @@ class AsyncImageProcessor:
                     
                     # Extract prompt from the result
                     if ('outputs' in result and 
-                        '4' in result['outputs'] and 
-                        'text' in result['outputs']['4'] and    
-                        isinstance(result['outputs']['4']['text'], list) and 
-                        len(result['outputs']['4']['text']) > 0):
-                        generated_prompt = result['outputs']['4']['text'][0]
+                        '19' in result['outputs'] and 
+                        'text' in result['outputs']['19'] and    
+                        isinstance(result['outputs']['19']['text'], list) and 
+                        len(result['outputs']['19']['text']) > 0):
+                        generated_prompt = result['outputs']['19']['text'][0]
                         print(f"Found prompt in final result: {generated_prompt}")
                         return {
                             'success': True,
@@ -269,7 +269,7 @@ class AsyncImageProcessor:
             
             try:
                 # Load the workflow template
-                workflow_path = os.path.join(os.path.dirname(__file__), "workflow", "MiniCPMV Prompt Creator Ali.json")
+                workflow_path = os.path.join(os.path.dirname(__file__), "workflow", "MiniCPMV-Prompt-Inference-Ali.json")
                 if not os.path.exists(workflow_path):
                     error_msg = f"Workflow file not found: {workflow_path}"
                     logger.error(error_msg)
